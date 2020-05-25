@@ -190,7 +190,7 @@ const createPages = async ctx => {
     const { title, post_name, contentRichText, guid, post_date } = post
     const entryId = getEntryId(guid)
     // format post data
-    const images = assets
+    const featuredImage = assets
       .filter(({ attachment }) => attachment.post_parent === post.post_id)
       .map(({ asset }) => ({
         sys: {
@@ -198,7 +198,7 @@ const createPages = async ctx => {
           linkType: 'Asset',
           id: asset.sys.id
         }
-      }))
+      }))[0]
     // scaffold the data
     const entryData = {
       sys: {
@@ -208,12 +208,12 @@ const createPages = async ctx => {
         title,
         slug: post_name,
         body: contentRichText,
-        images
+        featuredImage
       })
     }
     // create the entry
     try {
-      const entries = await limiter.schedule(() => environment.createEntryWithId('page', entryId, entryData))// await getOrCreateEntry(environment, 'page', entryId, entryData)
+      const entries = await getOrCreateEntry(environment, 'page', entryId, entryData)
       return entries
     } catch (err) {
       console.error(`Error creating ${title}`, entryData, err)
